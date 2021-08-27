@@ -17,6 +17,23 @@ Other things were kepts exactly the same.
 - **Shaders:** GLSL works the same whether you're using C++ or C#, so the shaders are 100% copy-pasted from OGLdev's example code with no changes at all.
 
 ****
+
+## Progress:
+
+\# | Title | Status | Links
+-- | -------------------------- | ------ | -------------
+ 1 | Open a window              | Ported | [Source](https://github.com/StevenGann/ogldev-silk/tree/main/tutorial01) / [Tutorial](https://www.ogldev.org/www/tutorial01/tutorial01.html)
+ 2 | Hello dot!                 | Ported | [Source](https://github.com/StevenGann/ogldev-silk/tree/main/tutorial02) / [Tutorial](https://www.ogldev.org/www/tutorial01/tutorial02.html)
+ 3 | First triangle             | Ported | [Source](https://github.com/StevenGann/ogldev-silk/tree/main/tutorial03) / [Tutorial](https://www.ogldev.org/www/tutorial01/tutorial03.html)
+ 4 | Shaders                    | Ported | [Source](https://github.com/StevenGann/ogldev-silk/tree/main/tutorial04) / [Tutorial](https://www.ogldev.org/www/tutorial01/tutorial04.html)
+ 5 | Uniform variables          | Ported | [Source](https://github.com/StevenGann/ogldev-silk/tree/main/tutorial05) / [Tutorial](https://www.ogldev.org/www/tutorial01/tutorial05.html)
+ 6 | Translation transformation | Ported | [Source](https://github.com/StevenGann/ogldev-silk/tree/main/tutorial06) / [Tutorial](https://www.ogldev.org/www/tutorial01/tutorial06.html)
+ 7 | Rotation transformation    | Ported | [Source](https://github.com/StevenGann/ogldev-silk/tree/main/tutorial07) / [Tutorial](https://www.ogldev.org/www/tutorial01/tutorial07.html)
+
+****
+
+## References:
+
 **The Tutorials:** [OGLdev Modern OpenGL Tutorials](https://www.ogldev.org/) (Original C++ code available there)
 
 **Silk.NET Examples:** [Silk.NET OpenGL Tutorials](https://github.com/dotnet/Silk.NET/tree/main/examples/CSharp/OpenGL%20Tutorials)
