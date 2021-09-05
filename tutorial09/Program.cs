@@ -12,6 +12,7 @@ namespace tutorial09
         private static GL Gl;
 
         private static VBO Vbo;
+        private static uint ShaderProgram;
 
         private const string pVSFileName = "shader.vs";
         private const string pFSFileName = "shader.fs";
@@ -32,13 +33,13 @@ namespace tutorial09
                 0.0f, 0.0f, 0.0f, 1.0f
                 );
 
-            Gl.UniformMatrix4(gWorldLocation, 1, Silk.NET.OpenGL.Boolean.True, World.M11);
+            Gl.UniformMatrix4(gWorldLocation, 1, Silk.NET.OpenGL.Boolean.True, (float*)&World);
 
             Gl.EnableVertexAttribArray(0);
 
             Vbo.Bind();
 
-            Gl.VertexAttribPointer(0, 3, GLEnum.Float, Silk.NET.OpenGL.Boolean.False, 0, 0);
+            Gl.VertexAttribPointer(0, 3, GLEnum.Float, Silk.NET.OpenGL.Boolean.False, 0, null);
 
             Gl.DrawArrays(GLEnum.Triangles, 0, 3);
 
@@ -97,7 +98,7 @@ namespace tutorial09
 
         private static void CompileShaders()
         {
-            uint ShaderProgram = Gl.CreateProgram();
+            ShaderProgram = Gl.CreateProgram();
 
             if (ShaderProgram == 0)
             {
