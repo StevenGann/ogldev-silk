@@ -1,9 +1,7 @@
-﻿using Silk.NET.Abstractions;
-using Silk.NET.Maths;
+﻿using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System;
-using System.Numerics;
 
 namespace tutorial04
 {
@@ -30,8 +28,6 @@ namespace tutorial04
             Gl.DrawArrays(GLEnum.Triangles, 0, 3);
 
             Gl.DisableVertexAttribArray(0);
-            Gl.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
-            Gl.BindVertexArray(0);
         }
 
         private static void OnUpdate(double Delta)
@@ -53,10 +49,10 @@ namespace tutorial04
 
         private static unsafe void CreateVertexBuffer()
         {
-            float[] Vertices =
+            Span<float> Vertices = new(new float[]
             { -1.0f, -1.0f, 0.0f,
                1.0f, -1.0f, 0.0f,
-               0.0f,  1.0f, 0.0f };
+               0.0f,  1.0f, 0.0f });
 
             Vao = Gl.GenVertexArray();
 
