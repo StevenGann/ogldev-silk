@@ -6,6 +6,8 @@ Port of the _OGLdev Modern OpenGL Tutorials_ examples from C++ to C#, featuring 
 
 I've done as much as possible to keep the OpenGL code 1:1 with OGLdev's C++, but there's a couple things that are definitely different.
 
+- **VAOs:** The original Tutorials don't use a VAO until Tutorial10, instead opting to depend on GLUT-Weirdness. As Silk.NET does not expose this functionallity and it is also not good OpenGL-Practice I use a VAO in these episodes, but explain it in more detail when apropriate. [Source: Robbe and Redstone#8025 Silk.NET Discord]
+
 - **Windowing:** I elected to use Silk.NET's SDL bindings for windowing rather than GLUT simply because Silk.NET doesn't have bindings to GLUT, and SDL is what Silk.NET's own examples use.
 
 - **Program Structure:** Silk.NET's window management is structured differently from GLUT's, making use of event handlers like `OnLoad()`. For the overall structure of each program I used the same approach as Silk.NET's examples. 
