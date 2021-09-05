@@ -13,6 +13,7 @@ namespace tutorial04
         private static GL Gl;
 
         private static uint Vbo;
+        private static uint Vao;
 
         private const string pVSFileName = "shader.vs";
         private const string pFSFileName = "shader.fs";
@@ -21,13 +22,16 @@ namespace tutorial04
         {
             Gl.Clear(ClearBufferMask.ColorBufferBit);
 
+            Gl.BindVertexArray(Vao);
             Gl.EnableVertexAttribArray(0);
             Gl.BindBuffer(GLEnum.ArrayBuffer, Vbo);
-            Gl.VertexAttribPointer(0, 3, GLEnum.Float, Silk.NET.OpenGL.Boolean.False, 0, 0);
+            Gl.VertexAttribPointer(0, 3, GLEnum.Float, false, 0, null);
 
             Gl.DrawArrays(GLEnum.Triangles, 0, 3);
 
             Gl.DisableVertexAttribArray(0);
+            Gl.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
+            Gl.BindVertexArray(0);
         }
 
         private static void OnUpdate(double Delta)
@@ -53,6 +57,8 @@ namespace tutorial04
             { -1.0f, -1.0f, 0.0f,
                1.0f, -1.0f, 0.0f,
                0.0f,  1.0f, 0.0f };
+
+            Vao = Gl.GenVertexArray();
 
             Gl.GenBuffers(1, out Vbo);
             Gl.BindBuffer(GLEnum.ArrayBuffer, Vbo);
