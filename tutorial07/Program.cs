@@ -1,5 +1,4 @@
-﻿using Silk.NET.Abstractions;
-using Silk.NET.Maths;
+﻿using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System;
@@ -11,7 +10,8 @@ namespace tutorial07
         private static IWindow window;
         private static GL Gl;
 
-        private static VBO Vbo;
+        private static uint Vbo;
+        private static uint Vao;
 
         private const string pVSFileName = "shader.vs";
         private const string pFSFileName = "shader.fs";
@@ -21,7 +21,7 @@ namespace tutorial07
 
         private static unsafe void OnRender(double Delta)
         {
-            Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
+            Gl.Clear(ClearBufferMask.ColorBufferBit);
 
             Scale += 0.001f;
 
@@ -32,13 +32,12 @@ namespace tutorial07
                 0.0f, 0.0f, 0.0f, 1.0f
                 );
 
-            Gl.UniformMatrix4(gWorldLocation, 1, Silk.NET.OpenGL.Boolean.True, World.M11);
+            Gl.UniformMatrix4(gWorldLocation, 1, true, (float*)&World);
 
+            Gl.BindVertexArray(Vao);
             Gl.EnableVertexAttribArray(0);
-
-            Vbo.Bind();
-
-            Gl.VertexAttribPointer(0, 3, GLEnum.Float, Silk.NET.OpenGL.Boolean.False, 0, 0);
+            Gl.BindBuffer(GLEnum.ArrayBuffer, Vbo);
+            Gl.VertexAttribPointer(0, 3, GLEnum.Float, false, 0, null);
 
             Gl.DrawArrays(GLEnum.Triangles, 0, 3);
 
@@ -62,16 +61,21 @@ namespace tutorial07
             CompileShaders();
         }
 
-        private static void CreateVertexBuffer()
+        private static unsafe void CreateVertexBuffer()
         {
-            float[] vertices = new float[]
-            {
-                -1.0f, -1.0f, 0.0f,
-                1.0f, -1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f
-            };
+            Span<float> Vertices = new(new float[]
+            { -1.0f, -1.0f, 0.0f,
+               1.0f, -1.0f, 0.0f,
+               0.0f,  1.0f, 0.0f });
 
-            Vbo = new VBO(Gl, vertices, GLEnum.StaticDraw);
+            Vao = Gl.GenVertexArray();
+
+            Gl.GenBuffers(1, out Vbo);
+            Gl.BindBuffer(GLEnum.ArrayBuffer, Vbo);
+            fixed (void* v = Vertices)
+            {
+                Gl.BufferData(GLEnum.ArrayBuffer, (nuint)(sizeof(float) * Vertices.Length), v, GLEnum.StaticDraw);
+            }
         }
 
         private static void AddShader(uint ShaderProgram, string pShaderText, GLEnum ShaderType)

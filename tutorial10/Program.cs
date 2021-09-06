@@ -1,5 +1,4 @@
-﻿using Silk.NET.Abstractions;
-using Silk.NET.Maths;
+﻿using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System;
@@ -11,11 +10,9 @@ namespace tutorial10
         private static IWindow window;
         private static GL Gl;
 
-        private static VBO Vbo;
-        private static EBO Ibo;
-
-        //private static VAO Vao;
-        private static uint ShaderProgram;
+        private static uint Vbo;
+        private static uint Ibo;
+        private static uint Vao;
 
         private const string pVSFileName = "shader.vs";
         private const string pFSFileName = "shader.fs";
@@ -25,29 +22,27 @@ namespace tutorial10
 
         private static unsafe void OnRender(double Delta)
         {
-            Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
+            Gl.Clear(ClearBufferMask.ColorBufferBit);
 
             Scale += 0.01f;
 
             Matrix4X4<float> World = new Matrix4X4<float>(
-                MathF.Sin(Scale), 0.0f, 0.0f, 0.0f,
-                0.0f, MathF.Sin(Scale), 0.0f, 0.0f,
-                0.0f, 0.0f, MathF.Sin(Scale), 0.0f,
+                MathF.Cos(Scale), 0.0f, -MathF.Sin(Scale), 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                MathF.Sin(Scale), 0.0f, MathF.Cos(Scale), 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f
                 );
 
-            Gl.UniformMatrix4(gWorldLocation, 1, Silk.NET.OpenGL.Boolean.True, (float*)&World);
+            Gl.UniformMatrix4(gWorldLocation, 1, true, (float*)&World);
+
+            Gl.BindVertexArray(Vao);
 
             Gl.EnableVertexAttribArray(0);
-
-            Vbo.Bind();
-            Ibo.Bind();
-
+            Gl.BindBuffer(GLEnum.ArrayBuffer, Vbo);
             Gl.VertexAttribPointer(0, 3, GLEnum.Float, false, 0, null);
+            Gl.BindBuffer(GLEnum.ElementArrayBuffer, Ibo);
 
-            Gl.UseProgram(ShaderProgram);
-
-            Gl.DrawElements(GLEnum.Triangles, 12, GLEnum.UnsignedInt, null);
+            Gl.DrawElements(GLEnum.Triangles, 12, DrawElementsType.UnsignedInt, null);
 
             Gl.DisableVertexAttribArray(0);
         }
@@ -64,6 +59,8 @@ namespace tutorial10
 
             Gl.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+            Vao = Gl.GenVertexArray();
+
             CreateVertexBuffer();
 
             CreateIndexBuffer();
@@ -71,28 +68,36 @@ namespace tutorial10
             CompileShaders();
         }
 
-        private static void CreateVertexBuffer()
+        private static unsafe void CreateVertexBuffer()
         {
-            float[] vertices = new float[]
-            {
-                -1.0f, -1.0f, 0.0f,
+            Span<float> Vertices = new(new float[]
+            { -1.0f, -1.0f, 0.0f,
                 0.0f, -1.0f, 1.0f,
                 1.0f, -1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f
-            };
+                0.0f, 1.0f, 0.0f });
 
-            Vbo = new VBO(Gl, vertices, GLEnum.StaticDraw);
+            Gl.GenBuffers(1, out Vbo);
+            Gl.BindBuffer(GLEnum.ArrayBuffer, Vbo);
+            fixed (void* v = Vertices)
+            {
+                Gl.BufferData(GLEnum.ArrayBuffer, (nuint)(sizeof(float) * Vertices.Length), v, GLEnum.StaticDraw);
+            }
         }
 
-        private static void CreateIndexBuffer()
+        private static unsafe void CreateIndexBuffer()
         {
-            uint[] Indices =
+            Span<uint> Indices = new(new uint[]
             { 0, 3, 1,
               1, 3, 2,
               2, 3, 0,
-              0, 1, 2 };
+              0, 1, 2 });
 
-            Ibo = new EBO(Gl, Indices);
+            Gl.GenBuffers(1, out Ibo);
+            Gl.BindBuffer(GLEnum.ElementArrayBuffer, Ibo);
+            fixed (void* i = Indices)
+            {
+                Gl.BufferData(GLEnum.ElementArrayBuffer, (nuint)(sizeof(uint) * Indices.Length), i, GLEnum.StaticDraw);
+            }
         }
 
         private static void AddShader(uint ShaderProgram, string pShaderText, GLEnum ShaderType)
@@ -118,9 +123,9 @@ namespace tutorial10
 
         private static unsafe void CompileShaders()
         {
-            ShaderProgram = Gl.CreateProgram();
+            uint ShaderObj = Gl.CreateProgram();
 
-            if (ShaderProgram == 0)
+            if (ShaderObj == 0)
             {
                 throw new Exception("Error creating shader program");
             }
@@ -131,30 +136,30 @@ namespace tutorial10
 
             fs = System.IO.File.ReadAllText(pFSFileName);
 
-            AddShader(ShaderProgram, vs, GLEnum.VertexShader);
-            AddShader(ShaderProgram, fs, GLEnum.FragmentShader);
+            AddShader(ShaderObj, vs, GLEnum.VertexShader);
+            AddShader(ShaderObj, fs, GLEnum.FragmentShader);
 
-            Gl.LinkProgram(ShaderProgram);
+            Gl.LinkProgram(ShaderObj);
 
-            Gl.GetProgram(ShaderProgram, GLEnum.LinkStatus, out var linkStatus);
+            Gl.GetProgram(ShaderObj, GLEnum.LinkStatus, out var linkStatus);
             if (linkStatus == 0)
             {
-                throw new Exception($"Error linking shader {Gl.GetProgramInfoLog(ShaderProgram)}");
+                throw new Exception($"Error linking shader {Gl.GetProgramInfoLog(ShaderObj)}");
             }
 
-            Gl.ValidateProgram(ShaderProgram);
-            Gl.GetProgram(ShaderProgram, GLEnum.ValidateStatus, out var validateStatus);
+            Gl.ValidateProgram(ShaderObj);
+            Gl.GetProgram(ShaderObj, GLEnum.ValidateStatus, out var validateStatus);
             if (validateStatus == 0)
             {
-                throw new Exception($"Invalid shader program: {Gl.GetProgramInfoLog(ShaderProgram)}");
+                throw new Exception($"Invalid shader program: {Gl.GetProgramInfoLog(ShaderObj)}");
             }
 
             Gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), null);
             Gl.EnableVertexAttribArray(0);
 
-            Gl.UseProgram(ShaderProgram);
+            Gl.UseProgram(ShaderObj);
 
-            gWorldLocation = Gl.GetUniformLocation(ShaderProgram, "gWorld");
+            gWorldLocation = Gl.GetUniformLocation(ShaderObj, "gWorld");
         }
 
         private static void Main()
