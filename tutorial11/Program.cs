@@ -2,6 +2,7 @@
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System;
+using System.Numerics;
 
 namespace tutorial11
 {
@@ -26,16 +27,10 @@ namespace tutorial11
 
             Scale += 0.001f;
 
-            Matrix4X4<float> World = new Matrix4X4<float>(
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-                );
-
-            World *= Matrix4X4.CreateTranslation(MathF.Sin(Scale), 0.0f, 0.0f);
-            World *= Matrix4X4.CreateFromYawPitchRoll(MathF.Sin(Scale) * 90.0f, MathF.Sin(Scale) * 90.0f, MathF.Sin(Scale) * 90.0f);
-            World *= Matrix4X4.CreateScale(MathF.Sin(Scale * 0.1f), MathF.Sin(Scale * 0.1f), MathF.Sin(Scale * 0.1f));
+            Matrix4x4 World = Matrix4x4.Identity;
+            World *= Matrix4x4.CreateFromYawPitchRoll(MathF.Sin(Scale) * 90.0f, MathF.Sin(Scale) * 90.0f, MathF.Sin(Scale) * 90.0f);
+            World *= Matrix4x4.CreateScale(MathF.Sin(Scale * 0.1f), MathF.Sin(Scale * 0.1f), MathF.Sin(Scale * 0.1f));
+            World *= Matrix4x4.CreateTranslation(MathF.Sin(Scale), 0.0f, 0.0f);
 
             Gl.UniformMatrix4(gWorldLocation, 1, true, (float*)&World);
 
