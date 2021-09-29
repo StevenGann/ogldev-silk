@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 namespace Common
 {
@@ -221,6 +222,33 @@ namespace Common
 
             m_WPtransformation = PersProjTrans * m_Wtransformation;
             return m_WPtransformation;
+        }
+
+        private Matrix4x4 InitPersProjTransform(PersProjInfo p)
+        {
+            float ar = p.Width / p.Height;
+            float zRange = p.zNear - p.zFar;
+            float tanHalfFOV = MathF.Tan((p.FOV / 2.0f) / 57.2957795f);
+
+            return new Matrix4x4()
+            {
+                M11 = 1.0f / (tanHalfFOV * ar),
+                M12 = 0.0f,
+                M13 = 0.0f,
+                M14 = 0.0f,
+                M21 = 0.0f,
+                M22 = 1.0f / tanHalfFOV,
+                M23 = 0.0f,
+                M24 = 0.0f,
+                M31 = 0.0f,
+                M32 = 0.0f,
+                M33 = (-p.zNear - p.zFar) / zRange,
+                M34 = 2.0f * p.zFar * p.zNear / zRange,
+                M41 = 0.0f,
+                M42 = 0.0f,
+                M43 = 1.0f,
+                M44 = 0.0f
+            };
         }
     };
 }

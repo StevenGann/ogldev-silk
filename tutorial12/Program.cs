@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using Common;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System;
@@ -18,23 +19,25 @@ namespace tutorial12
         private const string pVSFileName = "shader.vs";
         private const string pFSFileName = "shader.fs";
 
-        private static float Scale = 1.0f;
+        private static float Scale = 0.0f;
         private static int gWorldLocation;
+        private static PersProjInfo gPersProjInfo;
 
         private static unsafe void OnRender(double Delta)
         {
-            Gl.Clear(ClearBufferMask.ColorBufferBit);
+            Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            Gl.Enable(EnableCap.DepthTest);
 
-            Scale += 0.001f;
+            Scale += 0.1f;
 
-            var World =
-                Matrix4X4.CreateScale(1.0f, 1.0f, 1.0f)
-                * Matrix4X4.CreateFromYawPitchRoll(5.0f * Scale, 7.0f * Scale, 11.0f * Scale)
-                * Matrix4X4.CreateTranslation(0.0f, 0.0f, -10.0f)
-                * Matrix4X4.CreatePerspectiveFieldOfView(MathF.PI / 2f, 4.0f / 3.0f, 0.001f, 100.0f)
-                //* Matrix4X4.CreatePerspective(4f, 3f, 0.1f, 100f)
-                ;
+            Pipeline p = new();
 
+            p.Scale(5.0f);
+            p.Rotate(Scale, 0.0f, 0.0f);
+            p.WorldPos(0.0f, 0.0f, 50.0f);
+
+            p.SetPerspectiveProj(gPersProjInfo);
+            var World = p.GetWPTrans();
             Gl.UniformMatrix4(gWorldLocation, 1, true, (float*)&World);
 
             Gl.BindVertexArray(Vao);
@@ -68,14 +71,20 @@ namespace tutorial12
             CreateIndexBuffer();
 
             CompileShaders();
+
+            gPersProjInfo.FOV = 30.0f;
+            gPersProjInfo.Height = 768;
+            gPersProjInfo.Width = 1024;
+            gPersProjInfo.zNear = 1.0f;
+            gPersProjInfo.zFar = 100.0f;
         }
 
         private static unsafe void CreateVertexBuffer()
         {
             Span<float> Vertices = new(new float[]
-            { -1.0f, -1.0f, 0.5773f,
-                0.0f, -1.0f, -1.15475f,
-                1.0f, -1.0f, 0.5773f,
+            { -1.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f,
                 0.0f, 1.0f, 0.0f });
 
             Gl.GenBuffers(1, out Vbo);

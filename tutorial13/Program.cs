@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using Common;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System;
@@ -20,20 +21,30 @@ namespace tutorial13
 
         private static float Scale = 1.0f;
         private static int gWorldLocation;
+        private static PersProjInfo gPersProjInfo;
+        private static uint ShaderObj;
 
         private static unsafe void OnRender(double Delta)
         {
             Gl.Clear(ClearBufferMask.ColorBufferBit);
+            Gl.Enable(EnableCap.DepthTest);
 
-            Scale += 0.001f;
+            Scale += 0.1f;
 
-            var World =
-                Matrix4X4.CreateScale(1.0f, 1.0f, 1.0f)
-                * Matrix4X4.CreateFromYawPitchRoll(5.0f * Scale, 7.0f * Scale, 11.0f * Scale)
-                * Matrix4X4.CreateTranslation(0.0f, 0.0f, -10.0f)
-                * Matrix4X4.CreatePerspectiveFieldOfView(MathF.PI / 2f, 4.0f / 3.0f, 0.001f, 100.0f)
-                ;
+            Pipeline p = new();
 
+            p.Rotate(0.0f, Scale, 0.0f);
+            p.WorldPos(0.0f, 0.0f, 3.0f);
+
+            p.SetCamera(
+                new(0.0f, 0.0f, -3.0f), //Position
+                new(0.0f, 0.0f, 2.0f), //Target
+                new(0.0f, 1.0f, 0.0f) // Up
+                );
+            p.SetPerspectiveProj(gPersProjInfo);
+            var World = p.GetWPTrans();
+
+            Gl.UseProgram(ShaderObj);
             Gl.UniformMatrix4(gWorldLocation, 1, true, (float*)&World);
 
             Gl.BindVertexArray(Vao);
@@ -67,14 +78,20 @@ namespace tutorial13
             CreateIndexBuffer();
 
             CompileShaders();
+
+            gPersProjInfo.FOV = 30.0f;
+            gPersProjInfo.Height = 768;
+            gPersProjInfo.Width = 1024;
+            gPersProjInfo.zNear = 1.0f;
+            gPersProjInfo.zFar = 100.0f;
         }
 
         private static unsafe void CreateVertexBuffer()
         {
             Span<float> Vertices = new(new float[]
-            { -1.0f, -1.0f, 0.5773f,
-                0.0f, -1.0f, -1.15475f,
-                1.0f, -1.0f, 0.5773f,
+            { -1.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f,
                 0.0f, 1.0f, 0.0f });
 
             Gl.GenBuffers(1, out Vbo);
@@ -124,7 +141,7 @@ namespace tutorial13
 
         private static unsafe void CompileShaders()
         {
-            uint ShaderObj = Gl.CreateProgram();
+            ShaderObj = Gl.CreateProgram();
 
             if (ShaderObj == 0)
             {
@@ -168,7 +185,7 @@ namespace tutorial13
             //Create a window.
             var options = WindowOptions.Default;
             options.Size = new Vector2D<int>(1024, 768);
-            options.Title = "Tutorial 12";
+            options.Title = "Tutorial 13";
 
             window = Window.Create(options);
 

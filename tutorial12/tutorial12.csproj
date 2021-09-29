@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="shader.fs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

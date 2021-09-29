@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using Common;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System;
@@ -27,10 +28,11 @@ namespace tutorial11
 
             Scale += 0.001f;
 
-            Matrix4x4 World = Matrix4x4.Identity;
-            World *= Matrix4x4.CreateFromYawPitchRoll(MathF.Sin(Scale) * 90.0f, MathF.Sin(Scale) * 90.0f, MathF.Sin(Scale) * 90.0f);
-            World *= Matrix4x4.CreateScale(MathF.Sin(Scale * 0.1f), MathF.Sin(Scale * 0.1f), MathF.Sin(Scale * 0.1f));
-            World *= Matrix4x4.CreateTranslation(MathF.Sin(Scale), 0.0f, 0.0f);
+            Pipeline p = new();
+            p.Scale(MathF.Sin(Scale * 0.1f), MathF.Sin(Scale * 0.1f), MathF.Sin(Scale * 0.1f));
+            p.WorldPos(MathF.Sin(Scale), 0.0f, 0.0f);
+            p.Rotate(MathF.Sin(Scale) * 90.0f, MathF.Sin(Scale) * 90.0f, MathF.Sin(Scale) * 90.0f);
+            var World = p.GetWorldTrans();
 
             Gl.UniformMatrix4(gWorldLocation, 1, true, (float*)&World);
 
