@@ -20,9 +20,9 @@ namespace tutorial13
         private const string pFSFileName = "shader.fs";
 
         private static float Scale = 1.0f;
-        private static int gWorldLocation;
+        private static int gWVPLocation;
         private static PersProjInfo gPersProjInfo;
-        private static uint ShaderObj;
+        private static uint ShaderProgram;
 
         private static unsafe void OnRender(double Delta)
         {
@@ -44,8 +44,8 @@ namespace tutorial13
             p.SetPerspectiveProj(gPersProjInfo);
             var World = p.GetWPTrans();
 
-            Gl.UseProgram(ShaderObj);
-            Gl.UniformMatrix4(gWorldLocation, 1, true, (float*)&World);
+            Gl.UseProgram(ShaderProgram);
+            Gl.UniformMatrix4(gWVPLocation, 1, true, (float*)&World);
 
             Gl.BindVertexArray(Vao);
 
@@ -141,9 +141,9 @@ namespace tutorial13
 
         private static unsafe void CompileShaders()
         {
-            ShaderObj = Gl.CreateProgram();
+            ShaderProgram = Gl.CreateProgram();
 
-            if (ShaderObj == 0)
+            if (ShaderProgram == 0)
             {
                 throw new Exception("Error creating shader program");
             }
@@ -154,30 +154,29 @@ namespace tutorial13
 
             fs = System.IO.File.ReadAllText(pFSFileName);
 
-            AddShader(ShaderObj, vs, GLEnum.VertexShader);
-            AddShader(ShaderObj, fs, GLEnum.FragmentShader);
+            AddShader(ShaderProgram, vs, GLEnum.VertexShader);
+            AddShader(ShaderProgram, fs, GLEnum.FragmentShader);
 
-            Gl.LinkProgram(ShaderObj);
-
-            Gl.GetProgram(ShaderObj, GLEnum.LinkStatus, out var linkStatus);
+            Gl.LinkProgram(ShaderProgram);
+            Gl.GetProgram(ShaderProgram, GLEnum.LinkStatus, out var linkStatus);
             if (linkStatus == 0)
             {
-                throw new Exception($"Error linking shader {Gl.GetProgramInfoLog(ShaderObj)}");
+                throw new Exception($"Error linking shader {Gl.GetProgramInfoLog(ShaderProgram)}");
             }
 
-            Gl.ValidateProgram(ShaderObj);
-            Gl.GetProgram(ShaderObj, GLEnum.ValidateStatus, out var validateStatus);
+            Gl.ValidateProgram(ShaderProgram);
+            Gl.GetProgram(ShaderProgram, GLEnum.ValidateStatus, out var validateStatus);
             if (validateStatus == 0)
             {
-                throw new Exception($"Invalid shader program: {Gl.GetProgramInfoLog(ShaderObj)}");
+                throw new Exception($"Invalid shader program: {Gl.GetProgramInfoLog(ShaderProgram)}");
             }
 
             Gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), null);
             Gl.EnableVertexAttribArray(0);
 
-            Gl.UseProgram(ShaderObj);
+            Gl.UseProgram(ShaderProgram);
 
-            gWorldLocation = Gl.GetUniformLocation(ShaderObj, "gWorld");
+            gWVPLocation = Gl.GetUniformLocation(ShaderProgram, "gWVP");
         }
 
         private static void Main()

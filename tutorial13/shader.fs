@@ -1,6 +1,6 @@
-#version 330
+#version 410
 
-in vec4 Color;
+layout (location = 0) in vec4 Color;
 
 out vec4 FragColor;
 
